@@ -1,19 +1,19 @@
-"""harrypotter.core — the magic animation engine.
+"""duter.core — the sprite animation engine.
 
 Zero third-party dependencies: pure ``tkinter`` + standard library.
 
-Animation outline
+Animation Outline
 -----------------
-1. A wooden wand rises from the bottom of a starry night sky.
-2. The wand tip charges a pulsing orb of light ("Lumos").
-3. A firework shell launches with a golden trail and explodes at its apex.
+1. A tiny sprite materializes from stardust at the bottom of a starry night sky.
+2. It begins to dance, leaving trails of sparkling light.
+3. Bursts of joy explode around the sprite with colorful particles.
 4. A particle system simulates the bloom: gravity, air drag, colour cooling
    (white-hot -> theme colour -> dying ember) and flickering sparks.
-5. Optional finale: the sparks fade into a sky full of glitter and the
-   words "GOOD LUCK" appear one rainbow-coloured letter at a time, glow,
+5. Optional finale: the sparks fade into a sky full of sparkles and the
+   words "HAPPINESS" appear one rainbow-coloured letter at a time, glow,
    and gently vanish.
 
-Click anywhere to cast an extra firework. Press Esc to close early.
+Click anywhere to summon extra sparks. Press Esc to close early.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ import random
 import time
 import tkinter as tk
 
-__all__ = ["cast", "THEMES"]
+__all__ = ["summon", "MOODS"]
 
 # ----------------------------------------------------------------- palette
 
@@ -35,12 +35,12 @@ _WIDTH, _HEIGHT = 920, 620
 _MS = 16                         # frame interval (~60 fps)
 
 #: Built-in colour themes. ``"rainbow"`` picks a fresh random hue per burst.
-THEMES = {
+MOODS = {
     "rainbow": None,
     "gold": [(255, 200, 60), (255, 160, 50), (255, 235, 160)],
     "silver": [(210, 225, 255), (160, 185, 235), (240, 246, 255)],
-    "gryffindor": [(215, 35, 45), (255, 195, 70), (170, 25, 35)],
-    "slytherin": [(30, 165, 95), (170, 235, 195), (20, 115, 70)],
+    "sunrise": [(255, 140, 66), (255, 200, 120), (255, 100, 80)],
+    "ocean": [(70, 130, 180), (100, 200, 230), (173, 216, 230)],
 }
 
 
@@ -144,21 +144,21 @@ class _Shell:
 class _Show:
     """Owns the tkinter window and runs the whole animation state machine."""
 
-    def __init__(self, theme, duration, finish):
+    def __init__(self, mood, duration, finale):
         try:
             self.root = tk.Tk()
         except tk.TclError as exc:                     # no display available
             raise RuntimeError(
-                "harrypotter needs a graphical display (a desktop) to cast "
-                "its spell, but none was found: " + str(exc)
+                "duter needs a graphical display (a desktop) to summon "
+                "its sprite, but none was found: " + str(exc)
             ) from exc
 
-        self.theme = theme
+        self.mood = mood
         self.duration = max(2.0, duration)
-        self.finish = finish
-        self._casts = min(8, max(2, round((self.duration - 0.8) / 2.4)))
+        self.finale = finale
+        self._summons = min(8, max(2, round((self.duration - 0.8) / 2.4)))
 
-        self.root.title("goodluck ✦ a wand, fireworks & a little luck")
+        self.root.title("duter ✨ a sprite, sparks of joy & a little happiness")
         self.root.configure(bg=_hex(_BG))
         self.root.resizable(False, False)
         self.cv = tk.Canvas(self.root, width=_WIDTH, height=_HEIGHT,
@@ -172,9 +172,9 @@ class _Show:
         ))
 
         self._frame = 0
-        self._phase = "raise"          # raise -> charge -> flight -> settle
+        self._phase = "materialize"    # materialize -> dance -> burst -> settle
         self._pt = 0                   # frames spent in current phase
-        self._cast_no = 0
+        self._summon_no = 0
         self._sparks = []
         self._shells = []
         self._flashes = []
@@ -184,8 +184,8 @@ class _Show:
         self._t0 = time.time()
 
         self._build_sky()
-        self._build_wand()
-        self._build_tip_items()
+        self._build_sprite()
+        self._build_glow_items()
 
         self.root.protocol("WM_DELETE_WINDOW", self._close)
         self.root.bind("<Escape>", self._close)
@@ -205,57 +205,56 @@ class _Show:
                                        outline="")
             self._stars.append((item, c))
 
-    def _build_wand(self):
-        self._pivot = (_WIDTH * 0.66, _HEIGHT * 0.90)
-        self._wand_len = 215
-        self._angle = 18.0                             # degrees above horizon
-        px, py = self._pivot
-        tx, ty = self._tip_pos()
-        # dark outline, wood body, highlight streak
-        self._wand = [
-            self.cv.create_line(px, py, tx, ty, width=11,
-                                fill="#2b1c10", capstyle="round"),
-            self.cv.create_line(px, py, tx, ty, width=7,
-                                fill="#8a5a2e", capstyle="round"),
-        ]
-        self._wand_hi = self.cv.create_line(0, 0, 0, 0, width=2,
-                                           fill="#caa06a", capstyle="round")
-        self._knob = self.cv.create_oval(px - 8, py - 8, px + 8, py + 8,
-                                         fill="#3a2413", outline="#1c1209",
-                                         width=2)
+    def _build_sprite(self):
+        """Build the tiny magical sprite that dances across the sky."""
+        self._sprite_pos = (_WIDTH / 2, _HEIGHT * 0.85)
+        self._sprite_dy = 0
+        # Sprite body: a glowing orb with wings
+        self._sprite_body = self.cv.create_oval(0, 0, 0, 0, fill="#ffe4b5", outline="")
+        self._sprite_glow = self.cv.create_oval(0, 0, 0, 0, fill="#ffd700", stipple="gray50", outline="")
+        self._sprite_wing_l = self.cv.create_oval(0, 0, 0, 0, fill="#fffacd", stipple="gray25", outline="")
+        self._sprite_wing_r = self.cv.create_oval(0, 0, 0, 0, fill="#fffacd", stipple="gray25", outline="")
+        self._sprite_eyes = []
 
-    def _build_tip_items(self):
-        tx, ty = self._tip_pos()
-        self._glow_a = self.cv.create_oval(0, 0, 0, 0, fill="#ffd970",
+    def _build_glow_items(self):
+        """Build glow items for the sprite's aura."""
+        sx, sy = self._sprite_pos
+        self._aura_a = self.cv.create_oval(0, 0, 0, 0, fill="#ffd970",
                                            stipple="gray50", outline="")
-        self._glow_b = self.cv.create_oval(0, 0, 0, 0, fill="#ffe9a8",
+        self._aura_b = self.cv.create_oval(0, 0, 0, 0, fill="#ffe9a8",
                                            stipple="gray75", outline="")
-        self._orb = self.cv.create_oval(0, 0, 0, 0, fill="#fff6d8", outline="")
 
-    def _tip_pos(self):
-        px, py = self._pivot
-        a = math.radians(self._angle)
-        return (px + self._wand_len * math.cos(a),
-                py - self._wand_len * math.sin(a))
+    def _sprite_position(self):
+        """Get current sprite position with dance animation."""
+        sx, sy = self._sprite_pos
+        if self._phase == "materialize":
+            t = min(1.0, self._pt / 42.0)
+            e = 1.0 - (1.0 - t) ** 3
+            dy = (1.0 - e) * 100
+        elif self._phase == "dance":
+            dy = 8 * math.sin(self._frame * 0.06)
+        else:
+            dy = 4 * math.sin(self._frame * 0.04)
+        return (sx, sy - dy)
 
     # -------------------------------------------------------------- casting
 
-    def _cast_colors(self):
-        if self.theme == "rainbow":
+    def _mood_colors(self):
+        if self.mood == "rainbow":
             base = _random_hue()
             second = _random_hue() if random.random() < 0.35 else base
         else:
-            pal = THEMES[self.theme]
+            pal = MOODS[self.mood]
             base = random.choice(pal)
             second = random.choice(pal)
         return base, second
 
-    def _launch(self, colors=None):
-        tx, ty = self._tip_pos()
-        apex = (random.uniform(_WIDTH * 0.15, _WIDTH * 0.85),
-                random.uniform(_HEIGHT * 0.14, _HEIGHT * 0.34))
+    def _burst(self, colors=None):
+        sx, sy = self._sprite_position()
+        target = (random.uniform(_WIDTH * 0.15, _WIDTH * 0.85),
+                  random.uniform(_HEIGHT * 0.14, _HEIGHT * 0.34))
         self._shells.append(
-            _Shell(self.cv, tx, ty, apex[0], apex[1], colors or self._cast_colors()))
+            _Shell(self.cv, sx, sy - 20, target[0], target[1], colors or self._mood_colors()))
 
     def _explode(self, x, y, colors):
         base, second = colors
@@ -284,44 +283,37 @@ class _Show:
             ))
 
     def _on_click(self, _event):
-        """Click anywhere: the wand fires one more firework."""
-        if not self._done and self._phase != "raise":
-            self._launch()
+        """Click anywhere: the sprite creates more sparks of joy."""
+        if not self._done and self._phase != "materialize":
+            self._burst()
 
     # --------------------------------------------------------------- frames
 
-    def _update_wand(self):
-        if self._phase == "raise":
-            t = min(1.0, self._pt / 42.0)
-            e = 1.0 - (1.0 - t) ** 3                   # ease-out
-            self._angle = 18.0 + (74.0 - 18.0) * e
-        elif self._phase == "charge":                   # anticipation dip
-            self._angle = 74.0 - 5.0 * math.sin(math.pi * min(1.0, self._pt / 26.0))
-        else:                                           # idle sway
-            self._angle = 74.0 + 2.2 * math.sin(self._frame * 0.045)
+    def _update_sprite(self):
+        """Update sprite position and animation."""
+        sx, sy = self._sprite_position()
+        # Body
+        r = 12 + 2 * math.sin(self._frame * 0.1)
+        self.cv.coords(self._sprite_body, sx - r, sy - r, sx + r, sy + r)
+        # Glow aura
+        ga, gb = r * 2.5, r * 1.8
+        self.cv.coords(self._sprite_glow, sx - ga, sy - ga, sx + ga, sy + ga)
+        # Wings that flutter
+        wing_offset = 3 * math.sin(self._frame * 0.15)
+        self.cv.coords(self._sprite_wing_l, sx - r - 10, sy - wing_offset - 5, sx - r + 5, sy + wing_offset + 8)
+        self.cv.coords(self._sprite_wing_r, sx + r - 5, sy - wing_offset - 5, sx + r + 10, sy + wing_offset + 8)
 
-        px, py = self._pivot
-        tx, ty = self._tip_pos()
-        for line in self._wand:
-            self.cv.coords(line, px, py, tx, ty)
-        a = math.radians(self._angle)
-        nx, ny = math.sin(a), math.cos(a)               # wand normal
-        self.cv.coords(self._wand_hi,
-                       px + 5 * nx, py + 5 * ny,
-                       tx + 1.5 * nx, ty + 1.5 * ny)
-
-    def _update_tip(self):
-        tx, ty = self._tip_pos()
-        if self._phase == "charge":
+    def _update_aura(self):
+        """Update sprite's glowing aura."""
+        sx, sy = self._sprite_position()
+        if self._phase == "materialize":
             r = 4.0 + 2.5 * math.sin(self._pt * 0.45)
             ga, gb = r * 2.8, r * 1.6
-        else:                                           # faint idle "Lumos"
-            r = 2.0 + 0.4 * math.sin(self._frame * 0.1)
-            ga, gb = r * 2.0, r * 1.2
-        for item, rad in ((self._glow_a, ga), (self._glow_b, gb)):
-            self.cv.coords(item, tx - rad, ty - rad, tx + rad, ty + rad)
-        self.cv.coords(self._orb, tx - r, ty - r, tx + r, ty + r)
-        self.cv.tag_raise(self._orb)
+        else:
+            r = 3.0 + 0.6 * math.sin(self._frame * 0.1)
+            ga, gb = r * 2.2, r * 1.4
+        for item, rad in ((self._aura_a, ga), (self._aura_b, gb)):
+            self.cv.coords(item, sx - rad, sy - rad, sx + rad, sy + rad)
 
     def _update_shells(self):
         alive = []
@@ -368,27 +360,27 @@ class _Show:
         self._pt += 1
         ph = self._phase
 
-        if ph == "raise" and self._pt >= 42:
-            self._phase, self._pt = "charge", 0
+        if ph == "materialize" and self._pt >= 42:
+            self._phase, self._pt = "dance", 0
 
-        elif ph == "charge" and self._pt >= 26:
-            self._cast_no += 1
-            self._launch()
-            self._phase, self._pt = "flight", 0
+        elif ph == "dance" and self._pt >= 26:
+            self._summon_no += 1
+            self._burst()
+            self._phase, self._pt = "burst", 0
 
-        elif ph == "flight" and not self._shells:
+        elif ph == "burst" and not self._shells:
             self._phase, self._pt = "settle", 0
 
         elif ph == "settle" and self._pt >= 70:
-            if self._cast_no < self._casts:
-                self._phase, self._pt = "charge", 0
+            if self._summon_no < self._summons:
+                self._phase, self._pt = "dance", 0
             else:
                 self._phase, self._pt = "finale", 0
-                if self.finish:
+                if self.finale:
                     self._build_finale_text()
 
         elif ph == "finale":
-            if self.finish:
+            if self.finale:
                 self._update_finale()
             elif self._pt >= 25:
                 self._phase, self._pt = "over", 0
@@ -397,11 +389,11 @@ class _Show:
             self._close()
 
     def _build_finale_text(self):
-        """Each letter of "GOOD LUCK" gets its own rainbow hue."""
+        """Each letter of "DUTER" gets its own rainbow hue."""
         self._letters = []
-        text = "GOOD LUCK"
+        text = "DUTER"
         n = len(text)
-        spacing = 46
+        spacing = 56
         x0 = _WIDTH / 2 - spacing * (n - 1) / 2
         for i, ch in enumerate(text):
             if ch == " ":
@@ -411,12 +403,12 @@ class _Show:
                         for v in colorsys.hsv_to_rgb(hue, 0.9, 1.0))
             item = self.cv.create_text(
                 x0 + i * spacing, _HEIGHT * 0.42, text=ch,
-                font=("Georgia", 46, "bold"), fill=_hex(_BG))
+                font=("Georgia", 52, "bold"), fill=_hex(_BG))
             self._letters.append((item, col))
         self._sub = self.cv.create_text(
-            _WIDTH / 2, _HEIGHT * 0.42 + 58,
-            text="—  goodluck · may your day be magic  —",
-            font=("Georgia", 13, "italic"), fill=_hex(_BG))
+            _WIDTH / 2, _HEIGHT * 0.42 + 65,
+            text="—  a magical sprite bringing you joy  —",
+            font=("Georgia", 14, "italic"), fill=_hex(_BG))
 
     def _update_finale(self):
         pt = self._pt
@@ -463,8 +455,8 @@ class _Show:
         if self._done:
             return
         self._frame += 1
-        self._update_wand()
-        self._update_tip()
+        self._update_sprite()
+        self._update_aura()
         self._update_shells()
         self._update_sparks()
         self._update_flashes()
@@ -482,29 +474,29 @@ class _Show:
 
 # ----------------------------------------------------------------- public
 
-def cast(spell="rainbow", duration=8.0, finish="glitter"):
-    """Cast a spell: raise a wand and bloom fireworks in the night sky.
+def summon(mood="rainbow", duration=8.0, finale="sparkle"):
+    """Summon a sprite: a magical being appears and sparks of joy bloom in the night sky.
 
     Parameters
     ----------
-    spell : str
+    mood : str
         Colour theme: ``"rainbow"`` (default), ``"gold"``, ``"silver"``,
-        ``"gryffindor"`` or ``"slytherin"``.
+        ``"sunrise"`` or ``"ocean"``.
     duration : float
-        Rough length of the show in seconds (>= 2). At least two fireworks
-        are cast; more for longer durations.
-    finish : str or None
-        ``"glitter"`` (default) ends with a sky of glitter and the
-        rainbow-coloured words "GOOD LUCK"; ``None`` ends right after the
+        Rough length of the show in seconds (>= 2). At least two sparks
+        are created; more for longer durations.
+    finale : str or None
+        ``"sparkle"`` (default) ends with a sky of sparkles and the
+        rainbow-coloured words "HAPPINESS"; ``None`` ends right after the
         last burst.
 
     Notes
     -----
     Opens a tkinter window and blocks until it closes (automatically at the
     end of the show, or earlier via Esc / closing the window). While open,
-    click anywhere to fire one extra firework.
+    click anywhere to create extra sparks of joy.
     """
-    if spell not in THEMES:
-        raise ValueError("unknown spell %r; choose from %s"
-                         % (spell, sorted(THEMES)))
-    _Show(spell, float(duration), finish).run()
+    if mood not in MOODS:
+        raise ValueError("unknown mood %r; choose from %s"
+                         % (mood, sorted(MOODS)))
+    _Show(mood, float(duration), finale).run()

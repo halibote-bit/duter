@@ -1,52 +1,52 @@
-# goodluck ✦
+# duter ✨
 
-Cast a spell with one line of Python: a wand rises, its tip glows,
-fireworks bloom across a starry night sky — and at the end, **GOOD LUCK**
+Summon a sprite with one line of Python: a magical being appears, dances across a starry sky,
+sparks of joy bloom around it — and at the end, **HAPPINESS**
 appears in rainbow colours, one letter at a time.
 
 Run the window whenever you need it: it just might bring you a good mood
-and a little good luck. 🍀
+and a little joy. 🌟
 
 **Zero third-party dependencies** — pure standard-library `tkinter`.
 
 ```python
-import goodluck
-goodluck.cast()
+import duter
+duter.summon()
 ```
 
 While the window is open:
 
-- **Click anywhere** — the wand fires one more firework
+- **Click anywhere** — the sprite creates more sparks of joy
 - **Esc** or close the window — end early
 
 ## API
 
 ```python
-goodluck.cast(spell="rainbow", duration=8.0, finish="glitter")
+duter.summon(mood="rainbow", duration=8.0, finale="sparkle")
 ```
 
 | Parameter  | Default     | Meaning                                                      |
 |------------|-------------|--------------------------------------------------------------|
-| `spell`    | `"rainbow"` | Colour theme: `rainbow`, `gold`, `silver`, `gryffindor`, `slytherin` |
-| `duration` | `8.0`       | Rough show length in seconds (≥ 2); more fireworks for longer shows |
-| `finish`   | `"glitter"` | Finale: glitter sky + rainbow "GOOD LUCK"; `None` to skip |
+| `mood`    | `"rainbow"` | Colour theme: `rainbow`, `gold`, `silver`, `sunrise`, `ocean` |
+| `duration` | `8.0`       | Rough show length in seconds (≥ 2); more sparks for longer shows |
+| `finale`   | `"sparkle"` | Finale: sparkle sky + rainbow "HAPPINESS"; `None` to skip |
 
 ## Command line
 
 ```console
-python -m goodluck
-python -m goodluck --spell gryffindor --duration 12
-goodluck --spell gold --no-finish     # after `pip install goodluck`
+python -m duter
+python -m duter --mood sunrise --duration 12
+duter --mood gold --no-finale     # after `pip install duter`
 ```
 
 ## What happens on screen
 
-1. A wooden wand rises from the bottom of a starry sky
-2. Its tip charges a pulsing orb of light (*Lumos*)
-3. A shell launches with a golden trail and explodes at its apex
+1. A tiny sprite materializes from stardust at the bottom of a starry sky
+2. It begins to dance, leaving trails of sparkling light
+3. Bursts of joy explode around the sprite with colorful particles
 4. ~100 particles bloom with gravity, drag, flicker, and colour cooling
    (white-hot → theme colour → dying ember)
-5. Finale: glitter fills the sky, and **GOOD LUCK** glows in rainbow
+5. Finale: sparkles fill the sky, and **HAPPINESS** glows in rainbow
    letters before gently fading away, then the window closes itself
 
 ## Requirements
