@@ -1,4 +1,4 @@
-"""Command-line entry point: ``python -m harrypotter`` or ``harrypotter``."""
+"""Command-line entry point: ``python -m goodluck`` or ``goodluck``."""
 
 from __future__ import annotations
 
@@ -9,8 +9,9 @@ from .core import THEMES, cast
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        prog="harrypotter",
-        description="Cast a spell: a wand appears and fireworks bloom.")
+        prog="goodluck",
+        description="Cast a spell: a wand appears, fireworks bloom, "
+                    "and GOOD LUCK glows in the sky.")
     parser.add_argument(
         "--spell", default="rainbow", choices=sorted(THEMES),
         help="colour theme (default: rainbow)")
@@ -19,7 +20,7 @@ def main(argv=None):
         help="rough show length in seconds (default: 8)")
     parser.add_argument(
         "--no-finish", action="store_true",
-        help="skip the glitter finale")
+        help="skip the GOOD LUCK finale")
     args = parser.parse_args(argv)
     cast(spell=args.spell, duration=args.duration,
          finish=None if args.no_finish else "glitter")

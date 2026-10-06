@@ -3,15 +3,15 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "harrypotter"
+name = "goodluck"
 version = "0.1.0"
-description = "Cast a spell: a wand appears and fireworks bloom — one line of magic, zero dependencies."
+description = "Cast a spell: a wand appears and fireworks bloom, ending with GOOD LUCK glowing in the sky — one line of magic, zero dependencies, and maybe a little luck."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.8"
 authors = [{ name = "halibote" }]
-keywords = ["fireworks", "wand", "harry-potter", "magic", "toy", "animation", "tkinter"]
+keywords = ["goodluck", "good-luck", "fireworks", "wand", "magic", "toy", "animation", "tkinter"]
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
@@ -24,10 +24,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/halibote-bit/harrypotter"
+Homepage = "https://github.com/halibote-bit/goodluck"
 
 [project.scripts]
-harrypotter = "harrypotter.__main__:main"
+goodluck = "goodluck.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["harrypotter*"]
+include = ["goodluck*"]

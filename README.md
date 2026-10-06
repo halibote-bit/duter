@@ -1,13 +1,17 @@
-# harrypotter ✦
+# goodluck ✦
 
-Cast a spell with one line of Python: a wand rises, its tip glows, and
-fireworks bloom across a starry night sky.
+Cast a spell with one line of Python: a wand rises, its tip glows,
+fireworks bloom across a starry night sky — and at the end, **GOOD LUCK**
+appears in rainbow colours, one letter at a time.
+
+Run the window whenever you need it: it just might bring you a good mood
+and a little good luck. 🍀
 
 **Zero third-party dependencies** — pure standard-library `tkinter`.
 
 ```python
-import harrypotter
-harrypotter.cast()
+import goodluck
+goodluck.cast()
 ```
 
 While the window is open:
@@ -18,21 +22,21 @@ While the window is open:
 ## API
 
 ```python
-harrypotter.cast(spell="rainbow", duration=8.0, finish="glitter")
+goodluck.cast(spell="rainbow", duration=8.0, finish="glitter")
 ```
 
 | Parameter  | Default     | Meaning                                                      |
 |------------|-------------|--------------------------------------------------------------|
 | `spell`    | `"rainbow"` | Colour theme: `rainbow`, `gold`, `silver`, `gryffindor`, `slytherin` |
 | `duration` | `8.0`       | Rough show length in seconds (≥ 2); more fireworks for longer shows |
-| `finish`   | `"glitter"` | Finale: glitter sky + glowing "Expecto Patronum"; `None` to skip |
+| `finish`   | `"glitter"` | Finale: glitter sky + rainbow "GOOD LUCK"; `None` to skip |
 
 ## Command line
 
 ```console
-python -m harrypotter
-python -m harrypotter --spell gryffindor --duration 12
-harrypotter --spell gold --no-finish     # after `pip install harrypotter`
+python -m goodluck
+python -m goodluck --spell gryffindor --duration 12
+goodluck --spell gold --no-finish     # after `pip install goodluck`
 ```
 
 ## What happens on screen
@@ -42,8 +46,8 @@ harrypotter --spell gold --no-finish     # after `pip install harrypotter`
 3. A shell launches with a golden trail and explodes at its apex
 4. ~100 particles bloom with gravity, drag, flicker, and colour cooling
    (white-hot → theme colour → dying ember)
-5. Optional finale: glitter fills the sky and *"Expecto Patronum"* glows
-   and fades, then the window closes itself
+5. Finale: glitter fills the sky, and **GOOD LUCK** glows in rainbow
+   letters before gently fading away, then the window closes itself
 
 ## Requirements
 

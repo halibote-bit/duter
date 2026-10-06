@@ -10,7 +10,8 @@ Animation outline
 4. A particle system simulates the bloom: gravity, air drag, colour cooling
    (white-hot -> theme colour -> dying ember) and flickering sparks.
 5. Optional finale: the sparks fade into a sky full of glitter and the
-   words "Expecto Patronum" glow and vanish.
+   words "GOOD LUCK" appear one rainbow-coloured letter at a time, glow,
+   and gently vanish.
 
 Click anywhere to cast an extra firework. Press Esc to close early.
 """
@@ -157,7 +158,7 @@ class _Show:
         self.finish = finish
         self._casts = min(8, max(2, round((self.duration - 0.8) / 2.4)))
 
-        self.root.title("HarryPotter ✦ Expecto Fireworks")
+        self.root.title("goodluck ✦ a wand, fireworks & a little luck")
         self.root.configure(bg=_hex(_BG))
         self.root.resizable(False, False)
         self.cv = tk.Canvas(self.root, width=_WIDTH, height=_HEIGHT,
@@ -177,7 +178,7 @@ class _Show:
         self._sparks = []
         self._shells = []
         self._flashes = []
-        self._title = None
+        self._letters = []
         self._sub = None
         self._done = False
         self._t0 = time.time()
@@ -396,13 +397,25 @@ class _Show:
             self._close()
 
     def _build_finale_text(self):
-        self._title = self.cv.create_text(
-            _WIDTH / 2, _HEIGHT * 0.42,
-            text="✦  Expecto Patronum  ✦",
-            font=("Georgia", 30, "bold"), fill=_hex(_BG))
+        """Each letter of "GOOD LUCK" gets its own rainbow hue."""
+        self._letters = []
+        text = "GOOD LUCK"
+        n = len(text)
+        spacing = 46
+        x0 = _WIDTH / 2 - spacing * (n - 1) / 2
+        for i, ch in enumerate(text):
+            if ch == " ":
+                continue
+            hue = (i / n) * 0.85                       # rainbow sweep
+            col = tuple(int(v * 255)
+                        for v in colorsys.hsv_to_rgb(hue, 0.9, 1.0))
+            item = self.cv.create_text(
+                x0 + i * spacing, _HEIGHT * 0.42, text=ch,
+                font=("Georgia", 46, "bold"), fill=_hex(_BG))
+            self._letters.append((item, col))
         self._sub = self.cv.create_text(
-            _WIDTH / 2, _HEIGHT * 0.42 + 48,
-            text="—  harrypotter  —",
+            _WIDTH / 2, _HEIGHT * 0.42 + 58,
+            text="—  goodluck · may your day be magic  —",
             font=("Georgia", 13, "italic"), fill=_hex(_BG))
 
     def _update_finale(self):
@@ -418,22 +431,22 @@ class _Show:
                 r=random.uniform(1.0, 2.0), grav=0.008, drag=0.99,
                 flicker=True,
             ))
-        if pt <= 45:                                    # fade in
-            t = pt / 45.0
-            col = _hex(_mix(_BG, _GOLD, t))
-            sub = _hex(_mix(_BG, (150, 150, 170), t))
-        elif pt <= 115:                                 # hold
-            col, sub = _hex(_GOLD), "#9696aa"
-        elif pt <= 150:                                 # fade out
-            t = (pt - 115) / 35.0
-            col = _hex(_mix(_GOLD, _BG, t))
-            sub = _hex(_mix((150, 150, 170), _BG, t))
-        else:
-            self.cv.delete(self._title, self._sub)
+        if pt >= 160:                                   # all done
+            for item, _col in self._letters:
+                self.cv.delete(item)
+            self.cv.delete(self._sub)
             self._phase, self._pt = "over", 0
             return
-        self.cv.itemconfigure(self._title, fill=col)
-        self.cv.itemconfigure(self._sub, fill=sub)
+        # letters: staggered fade-in, hold, staggered fade-out
+        for i, (item, col) in enumerate(self._letters):
+            a_in = max(0.0, min(1.0, (pt - 3 * i) / 42.0))
+            a_out = max(0.0, min(1.0, (pt - 120 - 2 * i) / 32.0))
+            self.cv.itemconfigure(
+                item, fill=_hex(_mix(_BG, col, a_in * (1.0 - a_out))))
+        a_sub = max(0.0, min(1.0, pt / 45.0)) * (
+            1.0 - max(0.0, min(1.0, (pt - 120) / 32.0)))
+        self.cv.itemconfigure(
+            self._sub, fill=_hex(_mix(_BG, (150, 150, 170), a_sub)))
 
     # -------------------------------------------------------------- control
 
@@ -481,8 +494,9 @@ def cast(spell="rainbow", duration=8.0, finish="glitter"):
         Rough length of the show in seconds (>= 2). At least two fireworks
         are cast; more for longer durations.
     finish : str or None
-        ``"glitter"`` (default) ends with a sky of glitter and the glowing
-        words "Expecto Patronum"; ``None`` ends right after the last burst.
+        ``"glitter"`` (default) ends with a sky of glitter and the
+        rainbow-coloured words "GOOD LUCK"; ``None`` ends right after the
+        last burst.
 
     Notes
     -----
