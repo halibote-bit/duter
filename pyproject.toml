@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "harrypotter"
+version = "0.1.0"
+description = "Cast a spell: a wand appears and fireworks bloom — one line of magic, zero dependencies."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.8"
+authors = [{ name = "halibote" }]
+keywords = ["fireworks", "wand", "harry-potter", "magic", "toy", "animation", "tkinter"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Games/Entertainment",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://github.com/halibote-bit/harrypotter"
+
+[project.scripts]
+harrypotter = "harrypotter.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["harrypotter*"]
