@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "duter"
 version = "0.1.0"
-description = "Summon a sprite: a magical being appears and sparks of joy bloom, ending with HAPPINESS glowing in the sky — one line of magic, zero dependencies, and a little joy."
+description = "Summon a sprite: a magical being appears and sparks of joy bloom, ending with DUTER glowing in the sky — one line of magic, zero dependencies, and a little joy."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

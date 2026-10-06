@@ -10,7 +10,7 @@ Animation Outline
 4. A particle system simulates the bloom: gravity, air drag, colour cooling
    (white-hot -> theme colour -> dying ember) and flickering sparks.
 5. Optional finale: the sparks fade into a sky full of sparkles and the
-   words "HAPPINESS" appear one rainbow-coloured letter at a time, glow,
+   words "DUTER" appear one rainbow-coloured letter at a time, glow,
    and gently vanish.
 
 Click anywhere to summon extra sparks. Press Esc to close early.
@@ -487,7 +487,7 @@ def summon(mood="rainbow", duration=8.0, finale="sparkle"):
         are created; more for longer durations.
     finale : str or None
         ``"sparkle"`` (default) ends with a sky of sparkles and the
-        rainbow-coloured words "HAPPINESS"; ``None`` ends right after the
+        rainbow-coloured words "DUTER"; ``None`` ends right after the
         last burst.
 
     Notes
