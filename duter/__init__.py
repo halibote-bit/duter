@@ -13,5 +13,5 @@ press Esc (or close the window) to end early.
 
 from .core import MOODS, summon
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __all__ = ["summon", "MOODS", "__version__"]
